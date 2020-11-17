@@ -20,3 +20,16 @@ type User struct {
 	Email         string         `json:"email"`
 	Notifications []Notification `json:"notifications"`
 }
+
+type UpdateNotification struct {
+	ID     string `json:"id"`
+	UserID string `json:"userID"`
+	Seen   bool   `json:"seen"`
+}
+
+type UpdateUser struct {
+	ID    string  `json:"id"`
+	First *string `json:"first"`
+	Last  *string `json:"last"`
+	Email *string `json:"email"`
+}
