@@ -1,4 +1,4 @@
-module github.com/selenasolis1/data-sream
+module github.com/selenasolis1/data-stream
 
 go 1.13
 
