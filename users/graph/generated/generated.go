@@ -306,7 +306,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "users/graph/schema.graphql", Input: `schema {    
+	{Name: "graph/schema.graphql", Input: `schema {    
     query: Query    
     mutation: Mutation
 }
@@ -1092,9 +1092,9 @@ func (ec *executionContext) _User_notifications(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]model.Notification)
+	res := resTmp.([]*model.Notification)
 	fc.Result = res
-	return ec.marshalNNotification2ᚕgithubᚗcomᚋselenasolis1ᚋdataᚑstreamᚋusersᚋgraphᚋmodelᚐNotificationᚄ(ctx, field.Selections, res)
+	return ec.marshalNNotification2ᚕᚖgithubᚗcomᚋselenasolis1ᚋdataᚑstreamᚋusersᚋgraphᚋmodelᚐNotificationᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2766,11 +2766,7 @@ func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋselenasolis1ᚋdata
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNNotification2githubᚗcomᚋselenasolis1ᚋdataᚑstreamᚋusersᚋgraphᚋmodelᚐNotification(ctx context.Context, sel ast.SelectionSet, v model.Notification) graphql.Marshaler {
-	return ec._Notification(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNNotification2ᚕgithubᚗcomᚋselenasolis1ᚋdataᚑstreamᚋusersᚋgraphᚋmodelᚐNotificationᚄ(ctx context.Context, sel ast.SelectionSet, v []model.Notification) graphql.Marshaler {
+func (ec *executionContext) marshalNNotification2ᚕᚖgithubᚗcomᚋselenasolis1ᚋdataᚑstreamᚋusersᚋgraphᚋmodelᚐNotificationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Notification) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2794,7 +2790,7 @@ func (ec *executionContext) marshalNNotification2ᚕgithubᚗcomᚋselenasolis1�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNNotification2githubᚗcomᚋselenasolis1ᚋdataᚑstreamᚋusersᚋgraphᚋmodelᚐNotification(ctx, sel, v[i])
+			ret[i] = ec.marshalNNotification2ᚖgithubᚗcomᚋselenasolis1ᚋdataᚑstreamᚋusersᚋgraphᚋmodelᚐNotification(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2805,6 +2801,16 @@ func (ec *executionContext) marshalNNotification2ᚕgithubᚗcomᚋselenasolis1�
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNNotification2ᚖgithubᚗcomᚋselenasolis1ᚋdataᚑstreamᚋusersᚋgraphᚋmodelᚐNotification(ctx context.Context, sel ast.SelectionSet, v *model.Notification) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Notification(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
