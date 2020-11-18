@@ -1,0 +1,12 @@
+type Test {
+    Name: String!
+}
+
+type Query {
+    name: Test!
+    helloWorld: String!
+}
+
+type Subscription {
+    counting(sensor:String): Int!
+}
