@@ -7,7 +7,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/globalsign/mgo"
+	"github.com/selenasolis1/data-stream/db"
 	"github.com/selenasolis1/data-stream/users/graph/generated"
 	"github.com/selenasolis1/data-stream/users/graph/model"
 	"labix.org/v2/mgo/bson"
@@ -68,11 +71,76 @@ func (r *mutationResolver) UpdateNotification(ctx context.Context, input *model.
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user model.User
+	if err := r.users.FindId(bson.ObjectIdHex(id)).One(&user); err != nil {
+		return &model.User{}, err
+	}
+	user.ID = bson.ObjectId(user.ID).Hex()
+	return &user, nil
 }
 
-func (r *subscriptionResolver) NotificationAdded(ctx context.Context, id string) (<-chan *model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+// func (r *subscriptionResolver) NotificationAdded(ctx context.Context, id string) (<-chan *model.User, error) {
+// 	var userDoc model.User
+// 	var change bson.M
+// 	cs, err := r.users.Watch([]bson.M{},
+// 		mgo.ChangeStreamOptions{MaxAwaitTimeMS: time.Hour,
+// 			FullDocument: mgo.FullDocument("updateLookup")})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if cs.Err() != nil {
+// 		fmt.Println(err)
+// 	}
+// 	go func() {
+// 		start := time.Now()
+// 		for {
+// 			ok := cs.Next(&change)
+// 			if ok {
+// 				byts, _ := bson.Marshal(change["fullDocument"].(bson.M))
+// 				bson.Unmarshal(byts, &userDoc)
+// 				userDoc.ID = bson.ObjectId(userDoc.ID).Hex()
+// 				if userDoc.ID == id {
+// 					*userChan <- userDoc
+// 				}
+// 			}
+// 			if time.Since(start).Minutes() >= 60 {
+// 				break
+// 			}
+// 			continue
+// 		}
+// 	}()
+// 	return nil
+// }
+
+func (r *subscriptionResolver) NotificationAdded(ctx context.Context, id string, userChan *chan model.User) error {
+	var userDoc model.User
+	var change bson.M
+	cs, err := r.users.Watch([]bson.M{}, mgo.ChangeStreamOptions{MaxAwaitTimeMS: time.Hour, FullDocument: mgo.FullDocument("updateLookup")})
+	if err != nil {
+		return err
+	}
+	if cs.Err() != nil {
+		fmt.Println(err)
+	}
+	go func() {
+		start := time.Now()
+		for {
+			ok := cs.Next(&change)
+			if ok {
+				byts, _ := bson.Marshal(change["fullDocument"].(bson.M))
+				bson.Unmarshal(byts, &userDoc)
+				userDoc.ID = bson.ObjectId(userDoc.ID).Hex()
+				if userDoc.ID == id {
+					*userChan <- userDoc
+				}
+			}
+			if time.Since(start).Minutes() >= 60 {
+				break
+			}
+			continue
+		}
+	}()
+	return nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -96,13 +164,3 @@ func (r *Resolver) Subscription() generated.SubscriptionResolver {
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *Resolver) Mutation() generated.MutationResolver         { return &mutationResolver{r} }
-func (r *Resolver) Query() generated.QueryResolver               { return &queryResolver{r} }
-func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }

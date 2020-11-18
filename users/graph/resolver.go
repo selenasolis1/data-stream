@@ -2,6 +2,7 @@ package graph
 
 import (
 	"github.com/globalsign/mgo"
+	"github.com/selenasolis1/data-stream/db"
 	"github.com/selenasolis1/data-stream/users/graph/generated"
 )
 
